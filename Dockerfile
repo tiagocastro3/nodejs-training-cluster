@@ -1,15 +1,26 @@
+# Etapa de compilação
+FROM node:14 AS builder
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+# Etapa de produção
 FROM node:latest
 
 WORKDIR /app
 
-COPY package.json ./
+COPY --from=builder /app/dist ./dist
 
-RUN npm install
+COPY package*.json ./
 
-RUN npm run build
+RUN npm install --production
 
-COPY . .
+EXPOSE 80
 
-EXPOSE 8080
-
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/index.js"]
